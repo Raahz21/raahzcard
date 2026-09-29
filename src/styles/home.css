@@ -156,7 +156,14 @@
   opacity: 0;
   /* Greyscale is baked into the PNGs by scripts/prepare-artwork.mjs. The filter
      used to live here; on a full-bleed layer it re-rasterised a viewport-sized
-     image on every crossfade, so it is gone. */
+     image on every crossfade, so it is gone.
+
+     Only two of these layers ever exist, so `will-change` is safe here - unlike
+     the sixteen decorative icons. It promotes each to its own compositor layer,
+     which means the cross-fade is handled by the GPU and the card's
+     backdrop-filter reads a composited texture instead of re-rasterising the
+     images underneath on every frame of the 800ms transition. */
+  will-change: opacity;
   transition: opacity 800ms ease;
 }
 
@@ -187,13 +194,37 @@
   border: 2px solid var(--border-strong);
   transition: transform 0.3s ease;
   will-change: transform;
-  animation: portrait-glow 2.5s ease-in-out infinite;
-  /* Greyscale is baked into the PNG by scripts/prepare-artwork.mjs, so no
-     filter is needed here. That matters because this element animates: a
-     filter plus an animation is re-evaluated on the main thread every frame. */
+  /* The glow used to be a `portrait-glow` animation on this element, and that was
+     a real conflict rather than a cosmetic one: `useFloatAnimation` writes
+     `transform` from requestAnimationFrame, while the keyframes also animated
+     `transform`. Two owners of the same property means the browser resolves
+     them by priority on every frame - the rAF write stomps the keyframe, so the
+     glow was silently never visible, and the element was still paying to
+     interpolate a shadow that nobody saw.
+
+     Animating `box-shadow` is not compositor-friendly either: it forces a repaint
+     of the element's whole area on every frame, not just a cheap transform.
+
+     So the glow now lives on the ::after pseudo-element below, which owns its
+     own `opacity` and touches nothing the float loop writes. */
   /* Driven by useFloatAnimation through these custom properties. The float is
      translate + rotate only, so it can never shift the image off centre. */
   transform: translateY(var(--float-y, 0px)) rotate(var(--float-rot, 0deg));
+}
+
+/* The glow halo, on a pseudo-element so it can animate without fighting the
+   rAF-driven transform on the image itself. Opacity is a compositor property,
+   so the whole effect costs one cheap layer instead of a repaint per frame. */
+.card-image .aim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* A wide, soft halo sitting just outside the frame. */
+  box-shadow: 0 0 26px 8px var(--glow-strong);
+  opacity: 0;
+  pointer-events: none;
+  animation: portrait-glow 2.5s ease-in-out infinite;
 }
 
 .card-image .aim:hover {
@@ -232,10 +263,19 @@
   display: inline-block;
   opacity: 0;
   transform: translateY(20px);
-  transition: all 0.3s ease;
+  /* Named properties, not `all`.
+     The reveal animates exactly two things - opacity and transform - and both
+     are compositor properties. `transition: all` asked the browser to watch
+     every other animatable property on the element as well, which is wasted
+     work on a node that exists sixteen times over. The glow is applied to
+     `.letter.active` as a static value rather than transitioned in. */
+  transition: opacity 0.3s ease, transform 0.3s ease;
   position: relative;
 }
 
+/* The resting glow. Applied as a plain value rather than transitioned, so the
+   reveal does not have to animate a text-shadow, which cannot run on the
+   compositor and would repaint each letter on every step. */
 .animate-text .letter.active {
   opacity: 1;
   transform: translateY(0);

@@ -29,29 +29,47 @@ export function useFloatAnimation(range = 10, speed = 0.8, tilt = 2) {
       return undefined;
     }
 
+    /* Pause the loop while the tab is in the background. A browser does not
+       paint a hidden tab, so every frame this loop computes is thrown away -
+       but it still wakes the CPU sixty times a second, which is very noticeable
+       on a laptop battery and on a phone. The last position is simply held. */
+    let paused = document.hidden;
+
+    const onVisibility = () => {
+      paused = document.hidden;
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
+
     let offset = 0;
     let direction = 1;
     let angle = 0;
 
     const tick = () => {
-      offset += speed * direction;
-      if (offset > range) {
-        direction = -1;
-      }
-      if (offset < -range) {
-        direction = 1;
-      }
+      /* Skip the work, but keep the loop alive so it resumes on its own when the
+         tab comes back. requestAnimationFrame already stops firing in a hidden
+         tab, so in practice this is a belt-and-braces guard for browsers that
+         keep it alive for a hidden window. */
+      if (!paused) {
+        offset += speed * direction;
+        if (offset > range) {
+          direction = -1;
+        }
+        if (offset < -range) {
+          direction = 1;
+        }
 
-      angle += 0.6;
-      if (angle >= 360) {
-        angle = 0;
-      }
+        angle += 0.6;
+        if (angle >= 360) {
+          angle = 0;
+        }
 
-      node.style.setProperty('--float-y', `${offset.toFixed(2)}px`);
-      node.style.setProperty(
-        '--float-rot',
-        `${(Math.sin((angle * Math.PI) / 180) * tilt).toFixed(3)}deg`
-      );
+        node.style.setProperty('--float-y', `${offset.toFixed(2)}px`);
+        node.style.setProperty(
+          '--float-rot',
+          `${(Math.sin((angle * Math.PI) / 180) * tilt).toFixed(3)}deg`
+        );
+      }
 
       frameRef.current = requestAnimationFrame(tick);
     };
@@ -62,6 +80,7 @@ export function useFloatAnimation(range = 10, speed = 0.8, tilt = 2) {
       if (frameRef.current) {
         cancelAnimationFrame(frameRef.current);
       }
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [range, speed, tilt]);
 

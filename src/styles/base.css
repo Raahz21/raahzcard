@@ -88,6 +88,9 @@ html {
   --surface-stripe: #e7e7e7;
   /* The edge of the frozen column, to separate it from the scrolling cells. */
   --freeze-edge: rgba(0, 0, 0, 0.18);
+  /* Drop shadow under the sticky category chips, so the table visibly passes
+     beneath them rather than appearing to bleed through. */
+  --sticky-shadow: rgba(0, 0, 0, 0.12);
 
   --radius: 1rem;
   --transition: 300ms ease;
@@ -146,6 +149,9 @@ html {
   --surface-raise: #232323;
   --surface-stripe: #292929;
   --freeze-edge: rgba(255, 255, 255, 0.22);
+  /* A shadow is nearly invisible against a dark background, so the sticky chips
+     lean on the border for separation there and only get a soft lift. */
+  --sticky-shadow: rgba(0, 0, 0, 0.5);
 }
 
 /* ---------------------------------- base --------------------------------- */
@@ -163,6 +169,21 @@ body {
      scrollable. Flex centring would push the top out of reach. */
   padding: 1rem;
   transition: background var(--transition), color var(--transition);
+  /* The document must never scroll sideways.
+     The card is centred with `justify-content: center`, and a flex container
+     that centres an item wider than itself overflows equally on BOTH sides.
+     The left-hand overflow is then unreachable: the browser cannot scroll back
+     to content positioned before the scroll origin. That is exactly what the
+     services page was doing - the price table is wider than a phone, it forced
+     the card wide, and the card sat off the left edge with its first column
+     chopped in half and no way to scroll to see it.
+
+     `clip` rather than `hidden`, on purpose: `hidden` would make the body a
+     scroll container, which would break the `position: sticky` category chips
+     that keep the categories reachable on a phone. `clip` contains the
+     overflow without creating a scrollport. */
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .card {
@@ -176,6 +197,14 @@ body {
   box-shadow: var(--shadow);
   width: 90%;
   max-width: 800px;
+  /* The card is a flex item of the body, and a flex item defaults to
+     `min-width: auto` - it refuses to shrink below its content. The price table
+     inside is deliberately wider than a phone screen, so without this the card
+     was stretched to the table's width and then pushed off the left edge by the
+     body's centring. This lets the card keep to the viewport and lets the table
+     scroll inside it instead. */
+  min-width: 0;
+  max-width: min(800px, 100%);
   /* Never taller than the viewport it is being shown in, so short screens do
      not get a card that cannot be scrolled to the top of. */
   min-height: 600px;
@@ -190,6 +219,23 @@ body {
   display: flex;
   flex-direction: column;
   transition: background var(--transition), border-color var(--transition);
+}
+
+/* The services card drops the backdrop blur.
+   `backdrop-filter` is not free: the browser has to re-read and re-blur
+   everything painted behind the element, every time any of it changes. On the
+   services page the card sits on top of sixteen continuously animating images,
+   so that blur was being recomputed across a full-viewport region on every
+   frame, for decoration nobody looks at.
+
+   The card gets a solid background here, so removing the blur costs nothing
+   visually - there is no longer any content showing through it to blur. The home
+   page keeps the blur, because its backdrop really is content (the rotating
+   slideshow) and the card is deliberately translucent over it. */
+.card--services {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--surface-raise);
 }
 
 /* ------------------------------ HUD bezel -------------------------------- */

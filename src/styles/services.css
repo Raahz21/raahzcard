@@ -12,6 +12,23 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+
+  /* How much room to leave above the price panel when the page scrolls it into
+     view after a category change. Declared here so the stylesheet and the JS in
+     ServicesPage read the same number and the two cannot drift apart.
+
+     Zero on desktop because the chips are not sticky there. The mobile
+     breakpoint overrides it to clear the sticky chip row. Note it must stay in
+     px: ServicesPage parseFloat()s this value, and parseFloat('3.25rem') is
+     3.25 rather than a pixel count. */
+  --panel-anchor-offset: 0px;
+
+  /* The layout column must also be allowed to shrink. It is a flex column
+     inside .card-body, and a flex item defaults to `min-width: auto`, so a wide
+     child (the price table) would otherwise stretch this column - and with it
+     the card - past the viewport. */
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* The category picker.
@@ -66,7 +83,13 @@
   margin: 0;
   padding: 0.4rem 0.75rem;
   border: 1px solid var(--border);
-  color: var(--menu-text);
+  /* --text, not --menu-text. The --menu-* tokens are deliberately fixed white in
+     BOTH themes, because the home menu sits on a dark veil and needs white there
+     regardless of theme. This panel does not: in light mode the chips sit on a
+     near-white surface, so white text was invisible. --text follows the theme -
+     near-black on light, near-white on dark - which is what the unselected chips
+     need. The active chip is handled separately below and keeps its inversion. */
+  color: var(--text);
   text-align: center;
   /* Explicitly not `font: inherit`, which would drag the display face back in
      via a parent rule. */
@@ -84,11 +107,17 @@
 
 /* The active chip is inverted to solid white-on-black rather than tinted, so
    "which category am I looking at" is answered at a glance instead of by a
-   subtle background shift. */
+   subtle background shift.
+
+   This is the ONE place the --menu-* tokens are still correct here, and it is
+   deliberate: the active chip paints its own near-black panel in both themes, so
+   white text always sits on a dark background. The unselected chips above use
+   --text instead, because they show the panel through. The requested behaviour is
+   that the selected chip looks the same whichever theme is active. */
 .category-nav__link:hover,
 .category-nav .category-nav__link:hover {
   background: var(--hover-wash);
-  border-color: var(--menu-border-strong);
+  border-color: var(--border-strong);
 }
 
 .category-nav .category-nav__link.active {
@@ -105,6 +134,16 @@
    slide title, which is the one place it is branding rather than carrying data. */
 .price-content {
   width: 100%;
+  /* A flex/grid child defaults to `min-width: auto`, meaning it refuses to
+     shrink below the intrinsic width of its contents. This panel holds a table
+     that is deliberately wider than the screen, so without this the panel was
+     forced open to the table's width and pushed out past the card and off the
+     right-hand side of a phone. `min-width: 0` lets the panel stay inside the
+     card and scroll its own contents sideways, which is the entire point of it. */
+  min-width: 0;
+  /* Belt and braces: the panel can never be wider than its container, whatever
+     a future child does. */
+  max-width: 100%;
   overflow-x: auto;
   /* Momentum scrolling on touch devices, plus `contain` so a fast sideways
      flick scrolls the table instead of chaining to the page. */
@@ -117,6 +156,18 @@
   font-family: var(--font-body);
   font-weight: 400;
   transition: background var(--transition);
+
+  /* A floor on the panel height. Categories range from a handful of rows to
+     several dozen, so without this the page grew and shrank under the user on
+     every tap - the footer jumped, and on a phone the scroll position ended up
+     pointing at empty space. The floor is roughly the shortest real table, so it
+     costs nothing on the big ones and stops the collapse on the small ones. */
+  min-height: 22rem;
+
+  /* scrollIntoView(block: 'start') leaves the panel flush against the top of
+     the viewport. This offsets it so it lands below the sticky chip row on
+     mobile instead of tucked underneath it. */
+  scroll-margin-top: calc(var(--panel-anchor-offset) + 0.5rem);
 }
 
 /* The scrollbar is the only visible cue that the table continues sideways, so
@@ -153,11 +204,25 @@
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.05rem;
-  white-space: nowrap;
+  /* Wraps, and this is the fix for the panel stretching off a phone screen.
+     This was `white-space: nowrap`, and the slide titles are not short: the
+     longest is "🌬️ OCULI COLLECTION (By Piece / Whole Statue)" at 46 characters,
+     set in a wide display face. Forcing that onto one line made the title wider
+     than the viewport, which widened the scroller's content and made the whole
+     panel shoot off the right edge of the screen. Two things depend on this
+     wrapping: the title itself, and the panel staying inside the card.
+
+     `overflow-wrap: anywhere` is a safety net for a single unbroken token, so
+     even an unusually long word breaks rather than overflowing. */
+  overflow-wrap: anywhere;
   margin-bottom: 1rem;
   padding-bottom: 0.8rem;
   border-bottom: 1px solid var(--border);
-  color: var(--menu-text);
+  /* --text, not --menu-text, for the same reason as the chips: the --menu-* tokens
+     are fixed white in both themes, which left this title white-on-white and
+     barely visible on the light panel. The display face is thin-stroked, so it
+     needs full-contrast text rather than the muted grey used for secondary copy. */
+  color: var(--text);
 }
 
 /* Sub-headings describe a group of rows, so they are labels rather than titles:
@@ -321,7 +386,9 @@
 .nav-button {
   background: var(--surface-3);
   border: 1px solid var(--border-strong);
-  color: var(--menu-text);
+  /* Theme-aware for the same reason as the chips: these arrows sit on the light
+     panel in light mode, where a fixed-white glyph was invisible. */
+  color: var(--text);
   /* Square-ish: just enough padding around the arrow to make a comfortable
      44px touch target without the wasted width. */
   width: 2.75rem;
@@ -340,7 +407,7 @@
 
 .nav-button:hover {
   background: var(--hover-wash);
-  border-color: var(--menu-ring);
+  border-color: var(--border-strong);
 }
 
 .nav-button:active {
@@ -374,9 +441,12 @@
   display: block;
   position: sticky;
   left: 0;
-  /* Only as wide as its own text, so it does not stretch the scroll width. */
+  /* Only as wide as its own text, so it does not stretch the scroll width.
+     `max-width: 100%` stops it from widening the panel on a narrow screen, and
+     the text wraps rather than pushing the panel open. */
   width: max-content;
   max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .scroll-reminder i {
@@ -386,12 +456,28 @@
 }
 
 /* ------------------------- decorative artwork --------------------------- */
+/* The sixteen faint character images scattered behind the services page.
+   They are decoration, which is exactly why they have to be cheap: the eye
+   never focuses on them, but the browser was animating all sixteen forever,
+   every frame, for the entire visit - including while the tab was in the
+   background and nobody could see any of it.
+
+   `.decorative-icons.is-idle` is toggled from DecorativeIcons.jsx and suspends
+   every child animation. Two things set it: the tab being hidden, and
+   prefers-reduced-motion. The icons are also hidden on short viewports, where
+   they sit behind the card and are not visible at all. */
 .decorative-icons {
   position: fixed;
   width: 100%;
   height: 100%;
   pointer-events: none;
   z-index: 1;
+}
+
+/* `animation-play-state: paused` freezes the animation at its current frame
+   instead of removing it, so resuming is seamless and there is no jump. */
+.decorative-icons.is-idle .icon {
+  animation-play-state: paused;
 }
 
 .icon {
@@ -402,11 +488,18 @@
   transition: opacity 0.3s ease;
   /* No filter here on purpose. These sixteen images each run an infinite float
      animation, and a filter combined with a transform animation is re-evaluated
-     every frame on the main thread, which is what made the page feel laggy and
-     busy while doing nothing. The greyscale is baked into the PNGs by
-     scripts/prepare-artwork.mjs instead, so the animation is now just a
-     compositor-friendly transform. */
-  will-change: transform;
+     every frame on the main thread. The greyscale is baked into the PNGs by
+     scripts/prepare-artwork.mjs instead, so the animation is a plain transform.
+
+     Deliberately NO `will-change: transform` here. It was added earlier to
+     promote these to their own compositor layers, which is exactly the wrong
+     move at this count: `will-change` is a promise to keep a layer alive
+     forever, so sixteen of them hold sixteen textures resident for the whole
+     visit. On a phone that is a large slice of a small GPU memory budget, and
+     it made scrolling stutter.
+
+     A plain transform animation is already promoted automatically while it runs.
+     The layer is created and released on demand instead of being pinned. */
 }
 
 .icon-small {
@@ -456,10 +549,29 @@
   .service-layout {
     flex-direction: column;
     gap: 1.5rem;
+
+    /* The chip row becomes sticky below, so reserve its height plus a small gap
+       when the panel is scrolled into view. */
+    --panel-anchor-offset: 52px;
   }
 
+  /* Sticky category chips on small screens.
+     On a phone the price table is often taller than the viewport, so without
+     this the chips scrolled away and there was no way to change category
+     without scrolling all the way back up. The panel is now anchored below this
+     row, so the two never overlap.
+
+     `top` is the card's own padding, so the chips sit inside the card's edge
+     rather than under the browser's status bar. */
   .category-nav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
     padding: 0.5rem;
+    /* Opaque, because the table scrolls underneath. The translucent
+       --surface-2 wash would let rows show through the chips. */
+    background: var(--surface-raise);
+    box-shadow: 0 2px 8px var(--sticky-shadow);
   }
 
   /* The chips are a wrapping flex row now, so this no longer sets a grid
@@ -473,23 +585,62 @@
     font-size: 0.75rem;
   }
 
+  /* Full-bleed the panel edge-to-edge on a phone, the way the original did.
+     The old version used `margin: 0 -0.5rem; width: calc(100% + 1rem)`, which
+     overflowed the card by a rem on each side and, combined with the card's own
+     padding, was part of what pushed the layout off a narrow screen.
+
+     `width: 100%` with the negative margin kept for the bleed, and `max-width`
+     alongside it, is not needed: the real fix is that a flex/grid child defaults
+     to `min-width: auto`, which refuses to shrink below its content. That is
+     what let the long title and the wide table force the panel open. Setting
+     `min-width: 0` lets it stay inside the card and scroll internally, which is
+     the whole point of the panel. */
   .price-content {
     padding: 0.8rem;
     margin: 0 -0.5rem;
     width: calc(100% + 1rem);
+    /* Without this the panel cannot shrink below the table's width, so it grows
+       past the card and off the screen. */
+    min-width: 0;
+    max-width: calc(100% + 1rem);
   }
 
-  /* Tighten the padding on narrow screens. The type size is deliberately left
-     alone: it is already set small enough to read, so scaling it down further
-     only trades legibility for fit. The table scrolls instead. */
+  /* Fluid type and padding on narrow screens.
+     A fixed rem size has to be small enough for the narrowest phone and is then
+     too small on a tablet. These are viewport-relative with rem floors, so the
+     table scales continuously instead of jumping at breakpoints - which is the
+     "adjusts to every screen size" behaviour asked for.
+
+     The clamp floors are what keep the type readable; the ceilings stop it
+     ballooning on a large screen. */
   .price-table th,
   .price-table td,
   .price-table tbody th {
-    padding: 0.6rem 0.7rem;
+    padding: 0.6rem clamp(0.4rem, 1.4vw, 0.9rem);
+    font-size: clamp(0.7rem, 2.6vw, 0.88rem);
   }
 
   .price-table th {
-    font-size: 0.68rem;
+    font-size: clamp(0.58rem, 2vw, 0.7rem);
+    letter-spacing: 0.3px;
+  }
+
+  /* The slide title, likewise fluid. It is the widest text on the page - up to
+     46 characters in a display face - so it has to be able to shrink. */
+  .carousel h3 {
+    font-size: clamp(0.85rem, 3.4vw, 1.05rem);
+  }
+
+  /* The frozen label column is capped and allowed to wrap.
+     Every cell is `white-space: nowrap`, so without this the first column is as
+     wide as its longest label - and a long item name would eat most of a phone
+     screen, leaving almost no room for the prices it is supposed to label. */
+  .price-table th:first-child,
+  .price-table td:first-child {
+    max-width: 8.5rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .icon {
@@ -508,21 +659,13 @@
     padding: 0.6rem;
   }
 
-  .carousel h3 {
-    font-size: 1rem;
-  }
+  /* The type and padding are NOT set again here. They are already fluid via
+     clamp() in the 768px block above, so a second fixed value at 480px would
+     simply override that with a constant - the opposite of scaling. Letting the
+     clamp keep shrinking is what makes the table fit a 320px phone.
 
-  .price-table th,
-  .price-table td,
-  .price-table tbody th {
-    padding: 0.55rem 0.6rem;
-  }
-
-  .price-table th {
-    font-size: 0.64rem;
-    letter-spacing: 0.4px;
-  }
-
+     Only the spacing between elements, which is not width-dependent, is
+     tightened below. */
   .carousel-nav {
     gap: 0.6rem;
   }

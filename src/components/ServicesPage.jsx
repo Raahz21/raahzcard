@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CardFrame from './CardFrame';
 import DecorativeIcons from './DecorativeIcons';
@@ -20,6 +20,13 @@ export default function ServicesPage() {
   const [activeId, setActiveId] = useState(serviceCategories[0].id);
   const [indexes, setIndexes] = useState({});
 
+  /* The horizontal scroller. Tapping a category swaps in a table with a
+     different number of columns, but the *element* is the same, so the browser
+     keeps whatever scrollLeft it had. That is what made the page look like it
+     changed by itself: you tapped a chip and landed halfway across a different
+     table, with the first column frozen and no idea which one you were on. */
+  const panelRef = useRef(null);
+
   const category =
     serviceCategories.find((item) => item.id === activeId) ?? serviceCategories[0];
   const index = indexes[category.id] ?? 0;
@@ -28,9 +35,38 @@ export default function ServicesPage() {
     setIndexes((previous) => ({ ...previous, [category.id]: next }));
   };
 
+  /* Runs after the new table is in the DOM but before the browser paints, so
+     the reset is never visible as a jump. */
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) {
+      return;
+    }
+
+    // Always start a newly shown table at its first column.
+    panel.scrollLeft = 0;
+
+    /* Categories have very different row counts - one is a six-row list, the
+       next is thirty. The page therefore changes height underneath the user, and
+       on a phone that scroll position is no longer pointing at the new table.
+       Only scroll when the panel has actually left the viewport, so a tap that
+       is already looking at the panel does not yank the page. */
+    const box = panel.getBoundingClientRect();
+
+    /* Leave room for the sticky category chips, so the panel never lands
+       hidden underneath them. Matches --panel-anchor-offset in services.css. */
+    const offset = Number.parseFloat(
+      getComputedStyle(panel).getPropertyValue('--panel-anchor-offset'),
+    );
+
+    if (box.top < offset || box.bottom > window.innerHeight) {
+      panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+  }, [category.id, index]);
+
   return (
     <>
-      <div className="card">
+      <div className="card card--services">
         <CardFrame />
 
         <div className="card-header">
@@ -45,7 +81,7 @@ export default function ServicesPage() {
             onSelect={setActiveId}
           />
 
-          <div className="price-content">
+          <div className="price-content" ref={panelRef}>
             <div className="scroll-reminder">
               Swipe or scroll sideways <i>↔</i> for more columns
             </div>

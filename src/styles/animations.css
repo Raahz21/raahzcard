@@ -38,13 +38,18 @@
 }
 
 /* Replaces the original `aim-rgb-glow` hue cycle. */
+/* Animates opacity, not box-shadow.
+   The shadow itself is a single static value on `.card-image .aim::after`; only
+   its strength is animated here. `box-shadow` cannot be interpolated on the
+   compositor, so animating it directly repainted the element's full area on
+   every frame. Opacity is compositor-only, so this now costs a single layer. */
 @keyframes portrait-glow {
   0%,
   100% {
-    box-shadow: 0 0 18px 2px var(--glow-soft);
+    opacity: 0.35;
   }
   50% {
-    box-shadow: 0 0 26px 8px var(--glow-strong);
+    opacity: 1;
   }
 }
 

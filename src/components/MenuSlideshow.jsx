@@ -20,11 +20,50 @@ export default function MenuSlideshow({ images }) {
       return undefined;
     }
 
-    const id = setInterval(() => {
-      setIndex((current) => (current + 1) % images.length);
-    }, INTERVAL);
+    /* Each tick swaps a full-bleed background image and runs an 800ms cross-fade,
+       so the rotation is one of the more expensive things on the home page. There
+       is no reason to pay for it while the tab is in the background: nothing is
+       being watched, and returning to a tab that has cycled through four unseen
+       images is disorienting. The timer is therefore cleared while hidden and
+       started fresh on return, so the first image the user sees is always the
+       one that was showing when they left. */
+    let id = null;
 
-    return () => clearInterval(id);
+    const start = () => {
+      if (id === null) {
+        id = setInterval(() => {
+          setIndex((current) => (current + 1) % images.length);
+        }, INTERVAL);
+      }
+    };
+
+    const stop = () => {
+      if (id !== null) {
+        clearInterval(id);
+        id = null;
+      }
+    };
+
+    const onVisibility = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        start();
+      }
+    };
+
+    if (document.hidden) {
+      stop();
+    } else {
+      start();
+    }
+
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, [images.length, prefersReduced]);
 
   if (images.length === 0) {

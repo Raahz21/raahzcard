@@ -1,4 +1,5 @@
 import PriceTable from './PriceTable';
+import SlidePicker from './SlidePicker';
 import '../styles/services.css';
 
 /**
@@ -33,6 +34,15 @@ export default function ServiceCarousel({ category, index, onIndexChange }) {
 
       {hasMultiple ? (
         <>
+          {/* Named per category so the label reads correctly: "Region" for
+              Exploration, "Chapter" for Quest, and so on. */}
+          <SlidePicker
+            slides={slides}
+            index={index}
+            onChange={onIndexChange}
+            label={category.pickerLabel || 'Section'}
+          />
+
           <div className="carousel-nav">
             <button
               type="button"
@@ -42,6 +52,11 @@ export default function ServiceCarousel({ category, index, onIndexChange }) {
             >
               ←
             </button>
+
+            <p className="carousel-status" aria-live="polite">
+              {index + 1} of {slides.length}
+            </p>
+
             <button
               type="button"
               className="nav-button next"
@@ -51,10 +66,6 @@ export default function ServiceCarousel({ category, index, onIndexChange }) {
               →
             </button>
           </div>
-
-          <p className="carousel-status" aria-live="polite">
-            Slide {index + 1} of {slides.length}
-          </p>
         </>
       ) : null}
     </div>

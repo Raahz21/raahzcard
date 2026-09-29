@@ -135,6 +135,21 @@ function replaceArchonSlides(categories) {
   ];
 }
 
+/* What the sections inside each category are called, so the picker can label
+   itself correctly instead of a generic "Section". Exploration is divided into
+   regions, Quest into chapters, Ascension into what is being ascended, and so
+   on. Categories with a single section never render a picker at all. */
+const PICKER_LABELS = {
+  exploration: 'Region',
+  quest: 'Chapter',
+  ascension: 'Type',
+  farming: 'Service',
+  maintenance: 'Option',
+  map: 'Service',
+  abyss: 'Mode',
+  oculi: 'Collection',
+};
+
 const serviceCategories = generated.map((category) => ({
   ...category,
   slides: category.slides.map((slide) => ({ ...slide })),
@@ -145,6 +160,14 @@ addSlides(serviceCategories, 'quest', newQuestSlides);
 patchExplorationAreas(serviceCategories, natlanExtraAreas);
 patchQuestsAndBundle(serviceCategories, natlanExtraQuests, natlanBundle);
 replaceArchonSlides(serviceCategories);
+
+/* Label each category's section picker, so it reads "Region" for Exploration and
+   "Chapter" for Quest rather than a generic "Section". */
+for (const category of serviceCategories) {
+  if (PICKER_LABELS[category.id]) {
+    category.pickerLabel = PICKER_LABELS[category.id];
+  }
+}
 
 export { serviceCategories };
 export default serviceCategories;

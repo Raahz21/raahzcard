@@ -375,9 +375,89 @@
 
 .carousel-nav {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1.25rem;
+}
+
+/* ---------------------------- section picker ----------------------------- */
+/* A native <select> for choosing which section of a category is shown.
+   Exploration has 16 sections and Quest has 17, so the prev/next arrows alone
+   gave no way to see what was available or to jump to one. The select lists
+   every section by name and hands the popup to the platform, which on a phone
+   means the OS picker rather than a custom menu fighting a sticky header.
+
+   It lives outside the horizontal scroller so it does not scroll away with the
+   table, and the label wraps above it on a narrow screen. */
+.slide-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+  /* This sits inside the horizontal price scroller. Without a width cap the
+     select would contribute its full intrinsic width to the scroll width and
+     push the panel wider than the card, reintroducing the overflow that was
+     fixed earlier. */
+  max-width: 100%;
+  min-width: 0;
+}
+
+.slide-picker__label {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex: none;
+}
+
+.slide-picker__control {
+  position: relative;
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.slide-picker__select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  /* Room on the right for the caret, and a tall enough tap target. */
+  padding: 0.65rem 2.4rem 0.65rem 1rem;
+  cursor: pointer;
+  /* A long section name must truncate rather than widen the control, or the
+     select itself would push the panel wider than the card. */
+  text-overflow: ellipsis;
+}
+
+.slide-picker__select:hover {
+  background: var(--hover-wash);
+}
+
+.slide-picker__caret {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* The open dropdown list is drawn by the OS and cannot be themed, so the option
+   colours are set to match the panel where the platform honours them. */
+.slide-picker__select option {
+  background: var(--surface-raise);
+  color: var(--text);
 }
 
 /* Compact prev/next. These were 0.8rem x 1.5rem blocks around a single arrow
@@ -585,6 +665,7 @@
     font-size: 0.75rem;
   }
 
+
   /* Full-bleed the panel edge-to-edge on a phone, the way the original did.
      The old version used `margin: 0 -0.5rem; width: calc(100% + 1rem)`, which
      overflowed the card by a rem on each side and, combined with the card's own
@@ -668,6 +749,19 @@
      tightened below. */
   .carousel-nav {
     gap: 0.6rem;
+  }
+
+  /* On a phone the label sits above the control so the select gets the full
+     width and long region names stay readable rather than truncating. */
+  .slide-picker {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+
+  .slide-picker__select {
+    font-size: 0.85rem;
+    padding: 0.7rem 2.2rem 0.7rem 0.9rem;
   }
 
   /* The arrow buttons are sized by width/height now, so only the .btn keeps a

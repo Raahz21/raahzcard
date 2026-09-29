@@ -5,7 +5,10 @@ import DecorativeIcons from './DecorativeIcons';
 import ServiceCarousel from './ServiceCarousel';
 import ServiceNav from './ServiceNav';
 import { decorativeIcons } from '../data/site';
-import { serviceCategories } from '../data/services';
+/* The merged catalogue, not services.js directly: that file is generated from
+   the old plain-HTML site, and the Nodkrai / Snezhnaya data lives alongside it
+   in services-new-regions.js. serviceCatalog combines the two. */
+import { serviceCategories } from '../data/serviceCatalog';
 import '../styles/services.css';
 
 /**

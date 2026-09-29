@@ -77,28 +77,48 @@
 }
 
 /* ---------------------------- price content ----------------------------- */
+/* Bruno Ace SC is applied to the whole price area, per the brief. It ships a
+   single weight, so every font-weight below is pinned to 400 - leaving the old
+   500/700 values in place made the browser synthesise a faux bold, which the
+   face was never drawn for. Hierarchy comes from size, case and the opaque
+   header band instead. */
 .price-content {
   width: 100%;
   overflow-x: auto;
+  /* Momentum scrolling on touch devices, plus `contain` so a fast sideways
+     flick scrolls the table instead of chaining to the page. */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 0.8rem;
   padding: 1rem;
-  -webkit-overflow-scrolling: touch;
+  font-family: var(--font-display);
+  font-weight: 400;
   transition: background var(--transition);
 }
 
+/* The scrollbar is the only visible cue that the table continues sideways, so
+   it is made tall enough to grab rather than the 3px hairline it was. */
 .price-content::-webkit-scrollbar {
-  height: 3px;
+  height: 10px;
 }
 
 .price-content::-webkit-scrollbar-track {
   background: var(--surface-3);
+  border-radius: 5px;
 }
 
 .price-content::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
-  border-radius: 3px;
+  border-radius: 5px;
+}
+
+/* Firefox draws its own scrollbar, styled via scrollbar-width. */
+.price-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--surface-3);
 }
 
 .carousel {
@@ -107,7 +127,9 @@
 }
 
 .carousel h3 {
-  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.25rem;
   white-space: nowrap;
   margin-bottom: 1rem;
   padding-bottom: 0.8rem;
@@ -115,7 +137,9 @@
 }
 
 .carousel h4 {
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.05rem;
   color: var(--text-muted);
   margin: 1.5rem 0 0.8rem;
   padding-bottom: 0.5rem;
@@ -127,10 +151,13 @@
 }
 
 .note {
-  font-size: 0.85rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 0.9rem;
+  line-height: 1.6;
   color: var(--text-muted);
   margin-bottom: 1rem;
-  padding: 0.5rem;
+  padding: 0.75rem 0.9rem;
   background: var(--surface-3);
   border-radius: 0.5rem;
   border-left: 3px solid var(--border-strong);
@@ -138,41 +165,90 @@
 
 /* ------------------------------ tables ---------------------------------- */
 .price-table {
-  min-width: 500px;
+  /* Wider than the viewport on purpose: the columns are now large enough to
+     touch, so the table is expected to scroll sideways rather than compress.
+     640px keeps 5 columns readable before it needs to scroll on a phone. */
+  min-width: 640px;
+  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 .price-table th {
   background: var(--surface-3);
-  font-weight: 500;
-  padding: 1rem;
+  font-weight: 400;
+  /* Taller rows and looser tracking: this face is a wide display cut, so it
+     needs the air to stay readable at a glance. */
+  padding: 1.15rem 1.1rem;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   letter-spacing: 1px;
   text-align: left;
-  border-bottom: 1px solid var(--border-strong);
+  vertical-align: bottom;
+  border-bottom: 2px solid var(--border-strong);
+  /* Each header column is a snap target, so a flick lands on a whole column
+     instead of between two. */
+  scroll-snap-align: start;
 }
 
 .price-table td,
 .price-table tbody th {
-  padding: 1rem;
+  padding: 1.15rem 1.1rem;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 400;
   text-align: left;
+  vertical-align: middle;
   color: var(--text-muted);
+  scroll-snap-align: start;
 }
 
-/* The class was present in the original markup but had no rule attached. */
+/* The first column is frozen so the item being priced stays on screen while the
+   prices scroll past it. Without this, swiping sideways loses track of which row
+   a price belongs to - the exact confusion that makes a wide table unusable. */
+.price-table th:first-child,
+.price-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  /* Opaque, because the rows scroll underneath this column. */
+  background: var(--surface-raise);
+  /* A hard edge plus a shadow once content is sliding beneath it. */
+  box-shadow: 1px 0 0 var(--freeze-edge);
+}
+
+.price-table th:first-child {
+  z-index: 3;
+  background: var(--surface-raise);
+}
+
+/* Price columns read as figures, so they are right-aligned against each other,
+   which makes the numbers easy to compare down the column. */
+.price-table td:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The class was present in the original markup but had no rule attached.
+   Kept a background rather than a heavier weight, since the display face has
+   only one weight and a faux bold would smear it. */
 .price-table .total-row th,
 .price-table .total-row td {
-  font-weight: 700;
+  font-weight: 400;
   color: var(--text);
   background: var(--hover-wash);
-  border-top: 1px solid var(--border-strong);
+  border-top: 2px solid var(--border-strong);
+}
+
+/* The total row's frozen cell must stay opaque too, otherwise the rows above
+   scroll through it. */
+.price-table .total-row th:first-child {
+  background: var(--surface-raise);
 }
 
 /* ------------------------------ carousel -------------------------------- */
@@ -222,14 +298,24 @@
 }
 
 /* --------------------------- scroll reminder ---------------------------- */
+/* The table is now expected to scroll sideways at every width, so this hint is
+   no longer a small-screen-only extra: it is always shown. It is also sticky to
+   the left edge, because without that it scrolls out of sight after the first
+   swipe and stops doing its job. */
 .scroll-reminder {
-  font-size: 0.8rem;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
   color: var(--text-muted);
-  text-align: center;
-  padding: 0.5rem;
+  text-align: left;
+  padding: 0.6rem 0;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--border);
-  display: none;
+  display: block;
+  position: sticky;
+  left: 0;
+  /* Only as wide as its own text, so it does not stretch the scroll width. */
+  width: max-content;
+  max-width: 100%;
 }
 
 .scroll-reminder i {
@@ -325,18 +411,17 @@
     width: calc(100% + 1rem);
   }
 
-  .price-table {
-    font-size: 0.85rem;
-  }
-
+  /* The type scale is NOT shrunk here. Bruno Ace SC is a wide face and the
+     point of the change was a larger, more legible table, so the old
+     0.85rem / 0.7rem step-down would undo it. Only the padding tightens. */
   .price-table th,
   .price-table td,
   .price-table tbody th {
-    padding: 0.7rem;
+    padding: 0.95rem 0.9rem;
   }
 
-  .scroll-reminder {
-    display: block;
+  .price-table th {
+    font-size: 0.82rem;
   }
 
   .icon {
@@ -359,14 +444,15 @@
     font-size: 1rem;
   }
 
-  .price-table {
-    font-size: 0.8rem;
-  }
-
   .price-table th,
   .price-table td,
   .price-table tbody th {
-    padding: 0.6rem;
+    padding: 0.85rem 0.75rem;
+  }
+
+  .price-table th {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
   }
 
   .carousel-nav {

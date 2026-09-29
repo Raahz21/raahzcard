@@ -1,0 +1,462 @@
+/* ==========================================================================
+   Home card. Ported from index.css and re-coloured to the greyscale tokens.
+   ========================================================================== */
+
+/* The GITP link sits on the light card body. */
+.page {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.page:hover {
+  color: var(--text-faint);
+}
+
+/* Sticker links live in the dark menu panel and are styled with the rest of
+   the stickers further down this file - no duplicate rule here. */
+
+/* --------------------------------- layout -------------------------------- */
+/* One column: the portrait is centred on top, the menu spans the width below. */
+.card-image {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 1.75rem);
+  position: relative;
+  /* No overflow:hidden here - it used to clip the floating portrait. The menu
+     panel clips its own rounded corners instead. */
+  padding: clamp(0.75rem, 3vw, 20px);
+  margin: clamp(1rem, 3vw, 1.5rem) 0 0;
+}
+
+.card-image-navbar {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 1;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: background var(--transition);
+}
+
+/*
+ * The opaque panel surface.
+ *
+ * This used to be `var(--veil)` - a 62% black wash laid directly over the
+ * rotating artwork. In the dark theme the artwork is already dark, so that read
+ * as near-black and the light text was fine. In the light theme the artwork is
+ * bright, so 62% black over it only reached mid-grey: the pale chips and the
+ * sticker labels then sat on a light surface with poor contrast (see the light
+ * screenshot). `--menu-panel` is the opaque near-black that was defined for
+ * exactly this and never wired up.
+ *
+ * Keeping the fill on this pseudo-element (rather than on the element itself)
+ * preserves the original layering: the slideshow stays behind, the panel
+ * covers it, and the content stacks above.
+ */
+.card-image-navbar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--menu-panel);
+  border: 1px solid var(--menu-border);
+  border-radius: 1rem;
+  z-index: 1;
+  pointer-events: none;
+  transition: background var(--transition);
+}
+
+/* Same chip grid as the services category picker, so both pages read as one
+   design system. Only the colours differ: this panel is always the opaque
+   near-black surface defined above, so its text stays white in both themes.
+ * Four items rather than eight, so the column minimum is a little narrower to
+ * keep a clean row on desktop. */
+.card-image-navbar ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.8rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card-image-navbar li {
+  list-style-type: none;
+  width: 100%;
+  min-width: 0;
+  transition: transform 0.3s ease;
+}
+
+.card-image-navbar ul,
+.card-image-navbar ul li,
+.card-image-navbar ul li .nav-link {
+  position: relative;
+  z-index: 2;
+}
+
+/* One rule for every menu item, whether it is an <a> or the <button> that opens
+   the Stickers panel. The button-specific properties reset what the user-agent
+   gives buttons and anchors do not get: a border, centred text, and its own
+   `font` shorthand (which would otherwise shrink the label and change the
+   baseline). font-size must follow the `font` shorthand to win. */
+.card-image-navbar .nav-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid transparent;
+  /* White in both themes: this panel is always dark. */
+  color: var(--menu-text);
+  text-align: center;
+  font: inherit;
+  font-size: 1.05rem;
+  line-height: inherit;
+  background: var(--surface-3);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: all 0.3s ease;
+}
+
+.card-image-navbar .nav-link:hover,
+.card-image-navbar .nav-link:focus-visible {
+  background: var(--hover-wash);
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+/* ----------------------------- menu slideshow ---------------------------- */
+.menu-bg-slideshow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Two layers cross-fade; the original faded a single element out, swapped the
+   background image, then faded it back in. */
+.menu-bg-slideshow__layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  filter: grayscale(1) contrast(1.05);
+  transition: opacity 800ms ease;
+}
+
+.menu-bg-slideshow__layer.is-current {
+  opacity: 0.4;
+}
+
+/* ------------------------------ portrait -------------------------------- */
+/* The figure spans the full column and centres its own children, so the art is
+   dead-centre at any width - it no longer depends on the parent's alignment or
+   on the image's intrinsic size. */
+.card-image__portrait {
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+}
+
+.card-image .aim {
+  position: relative;
+  /* Fluid at every size: 136px floor, 200px ceiling, scaling with the viewport
+     in between. No breakpoint needed. */
+  width: clamp(8.5rem, 40vw, 12.5rem);
+  height: clamp(8.5rem, 40vw, 12.5rem);
+  border-radius: 1rem;
+  object-fit: cover;
+  border: 2px solid var(--border-strong);
+  transition: transform 0.3s ease;
+  will-change: transform;
+  animation: portrait-glow 2.5s ease-in-out infinite;
+  /* Desaturated so the artwork matches the greyscale palette. */
+  filter: grayscale(1) contrast(1.05);
+  /* Driven by useFloatAnimation through these custom properties. The float is
+     translate + rotate only, so it can never shift the image off centre. */
+  transform: translateY(var(--float-y, 0px)) rotate(var(--float-rot, 0deg));
+}
+
+.card-image .aim:hover {
+  transform: translateY(var(--float-y, 0px)) rotate(var(--float-rot, 0deg)) scale(1.05);
+}
+
+.aim-caption {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ------------------------------ wordmark -------------------------------- */
+.animate-text {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.name-group,
+.commission-group {
+  display: flex;
+  flex-wrap: nowrap;
+  /* The letters are individual flex items with no automatic spacing, so they
+     rely on the font's sidebearings. Bruno Ace SC is a wide display face and
+     needs a little air of its own - 0.06em scales with the font size. */
+  gap: 0.06em;
+}
+
+.animate-text .letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.animate-text .letter.active {
+  opacity: 1;
+  transform: translateY(0);
+  text-shadow: 0 0 10px var(--glow-soft);
+}
+
+.animate-text .letter:hover {
+  animation: bounce 0.5s ease infinite;
+}
+
+/* One staggered keyframe replaces the original's two overlapping scripts. */
+.animate-text.is-waving .letter {
+  animation: letterWave 0.5s ease both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+.animate-text.is-waving .letter:hover {
+  animation: letterWave 0.5s ease both;
+}
+
+.animate-text .letter.is-sparkling {
+  text-shadow: 0 0 20px var(--glow-strong);
+}
+
+/* ------------------------- stickers panel ------------------------------- */
+/* A full-width grid below the chips, inside the same dark panel. */
+.stickers-toggle__caret {
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-left: 0.5rem;
+  border-right: 1.6px solid currentColor;
+  border-bottom: 1.6px solid currentColor;
+  transform: rotate(45deg) translate(-0.1rem, -0.1rem);
+  transition: transform var(--transition);
+}
+
+.stickers-toggle__caret.is-open {
+  transform: rotate(225deg) translate(-0.1rem, -0.1rem);
+}
+
+.stickers-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  justify-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  margin-top: 0.1rem;
+  padding: 1.1rem 0.6rem 0.6rem;
+  /*
+   * This panel is a SIBLING of the <ul>, not a child of it, so it does not
+   * inherit the `position: relative; z-index: 2` that lifts the chips above the
+   * `.card-image-navbar::after` surface. Without this the whole panel painted
+   * underneath that pseudo-element: harmless while the surface was the
+   * translucent --veil, but once it became the 0.96-opaque --menu-panel it hid
+   * the artwork almost completely. Same stacking contract as the chips.
+   */
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid var(--menu-border);
+  border-radius: 0 0 0.9rem 0.9rem;
+}
+
+/* The class sets display:grid, which would otherwise beat the user-agent
+   [hidden] rule and leave the closed panel on screen. */
+.stickers-panel[hidden] {
+  display: none;
+}
+
+.stickers-panel:not([hidden]) {
+  animation: stickers-in 280ms ease both;
+}
+
+.sticker-item {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 0.6rem;
+  border: 1px solid var(--menu-border-strong);
+  border-radius: 0.7rem;
+  background: var(--menu-card);
+  text-align: center;
+  transition: border-color var(--transition), background var(--transition),
+    transform var(--transition);
+}
+
+.sticker-item:hover {
+  border-color: var(--menu-text);
+  background: var(--menu-hover-strong);
+  transform: translateY(-2px);
+}
+
+/*
+ * A plain square holder for the artwork.
+ *
+ * Every sticker is a transparent PNG, so there is nothing to blend: the frame
+ * only reserves consistent space and carries the rounded corner. The GITP
+ * sticker previously needed `mix-blend-mode: screen` to fake transparency
+ * because it was a JPEG with a black background baked into the pixels - that
+ * is now real alpha, generated by scripts/extract-sticker-alpha.mjs.
+ */
+.sticker-item__frame {
+  display: grid;
+  place-items: center;
+  width: 144px;
+  height: 144px;
+  border-radius: 0.6rem;
+}
+
+.sticker-item__image {
+  width: 144px;
+  height: 144px;
+  object-fit: contain;
+  /* A bright ring keeps the dark artwork's edge readable on the dark panel. */
+  border: 2px solid var(--menu-ring);
+  border-radius: 0.5rem;
+  /*
+   * The artwork is dark, low-key line art. A plain `contain` fit on a
+   * transparent frame leaves it floating with no edge of its own, so the ring
+   * above does the separating. No filter: the PNGs are already correct.
+   */
+  background: transparent;
+  transition: filter var(--transition);
+}
+
+.sticker-item:hover .sticker-item__image {
+  border-color: var(--menu-text);
+}
+
+.sticker-label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--menu-text);
+  /* The labels sit over arbitrary artwork, so a soft dark shadow keeps pure
+     white readable whatever the sticker looks like underneath. */
+  text-shadow: 0 1px 3px var(--menu-text-shadow);
+  text-wrap: balance;
+}
+
+.sticker-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--menu-text);
+  text-shadow: 0 1px 3px var(--menu-text-shadow);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.sticker-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.sticker-link:hover {
+  color: var(--menu-text);
+}
+
+/* ------------------------------ responsive ------------------------------ */
+/* The chips keep their format at every width; only the grid tightens. The old
+   rules here forced full-width centred rows, which undid the chip look. */
+@media screen and (max-width: 768px) {
+  .card-image-navbar {
+    padding: 0.7rem;
+  }
+
+  .card-image-navbar ul {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .card-image-navbar .nav-link {
+    padding: 0.8rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  /* The portrait and its caption are fluid (clamp), so they need no override
+     here any more. The card's own padding is handled in base.css. */
+
+  .animate-text {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .commission-group {
+    white-space: nowrap;
+  }
+
+  .animate-text .letter {
+    font-size: calc(1.2rem + 2vw);
+  }
+
+  /* The sticker panel is a grid already; only the column minimum tightens so
+     three stickers still fit on a narrow phone. */
+  .stickers-panel {
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: 0.6rem;
+    padding: 0.9rem 0.5rem 0.5rem;
+  }
+
+  .sticker-item__frame {
+    width: 104px;
+    height: 104px;
+  }
+
+  .sticker-item__image {
+    width: 104px;
+    height: 104px;
+  }
+
+  /* Keep the switch cluster clear of the card on small screens. The offset now
+     lives on the shared wrapper, since that is what carries the fixed
+     positioning; scaling it shrinks the theme switch and the mute button
+     together. */
+  .app-toggles {
+    top: 0.6rem;
+    right: 0.6rem;
+    transform: scale(0.9);
+    transform-origin: top right;
+  }
+}

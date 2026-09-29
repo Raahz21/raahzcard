@@ -1,0 +1,628 @@
+/* ==========================================================================
+   Shared foundation + the monochrome design tokens.
+   Ported from the duplicated top section of index.css and services.css, then
+   re-coloured: the card is now greyscale and switchable light/dark.
+   ========================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* --------------------------------- tokens -------------------------------- */
+:root {
+  color-scheme: light;
+
+  /* Bruno Ace SC is the display face, same as the Portfolio build. It ships a
+     single weight, so it is used at 400 to avoid synthetic bolding. */
+  --font-display: 'Bruno Ace SC', 'Segoe UI', Arial, sans-serif;
+  --font-body: 'Segoe UI', Arial, sans-serif;
+
+  --bg-from: #ffffff;
+  --bg-to: #e4e4e4;
+
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-2: rgba(0, 0, 0, 0.045);
+  --surface-3: rgba(0, 0, 0, 0.075);
+  --surface-inset: rgba(0, 0, 0, 0.03);
+
+  --border: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.26);
+  --text: #0b0b0b;
+  --text-muted: #4c4c4c;
+  --text-faint: #7b7b7b;
+
+  --accent: #0b0b0b;
+  --on-accent: #ffffff;
+  --focus-ring: #0b0b0b;
+  --hover-wash: rgba(0, 0, 0, 0.06);
+
+  /* the veil that keeps the home menu readable over the artwork */
+  --veil: rgba(0, 0, 0, 0.62);
+
+  /* The home menu always sits on the dark veil above the artwork, so its text is
+     white in BOTH themes - light mode must not flip it to near-black on a dark
+     panel. Identical in both palettes by design. */
+  --menu-text: #ffffff;
+  --menu-text-muted: rgba(255, 255, 255, 0.72);
+  --menu-panel: rgba(18, 18, 18, 0.96);
+  --menu-border: rgba(255, 255, 255, 0.16);
+  --menu-hover: rgba(255, 255, 255, 0.12);
+  --menu-hover-strong: rgba(255, 255, 255, 0.16);
+  --menu-underline: rgba(255, 255, 255, 0.7);
+  /* Sticker cards need clear separation from the now-opaque near-black panel.
+     A 20% white wash over #121212 lands around #4a4a4a, which is where the
+     dark artwork used to disappear. */
+  --menu-card: rgba(255, 255, 255, 0.07);
+  --menu-border-strong: rgba(255, 255, 255, 0.28);
+  --menu-card-shadow: rgba(0, 0, 0, 0.45);
+  /* A bright ring around each image, so dark artwork keeps a visible edge. */
+  --menu-ring: rgba(255, 255, 255, 0.55);
+  /* Guarantees the white labels stay readable over any sticker artwork. */
+  --menu-text-shadow: rgba(0, 0, 0, 0.6);
+
+  /* the portrait's pulse, greyscale instead of the original RGB rainbow */
+  --glow-strong: rgba(0, 0, 0, 0.42);
+  --glow-soft: rgba(0, 0, 0, 0.12);
+
+  --wave-soft: #9c9c9c;
+  --wave-strong: #0b0b0b;
+
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.25);
+
+  --radius: 1rem;
+  --transition: 300ms ease;
+
+  /* --------------------------- HUD card frame ---------------------------- */
+  /* The bezel is drawn in --ink, which is --text: near-black on the light
+     surface and near-white on the dark one, so the frame inverts with the
+     theme without a second set of rules. */
+  --ink: var(--text);
+  /* Corner bracket size and stroke weight. */
+  --hud-corner: 58px;
+  --hud-arm: 5px;
+  --hud-notch: 16px;
+  /* Bar and rail cross-sections. */
+  --hud-bar-h: 13px;
+  --hud-rail-w: 11px;
+  /* The inset keeps the bezel clear of the card's rounded corners. */
+  --hud-inset: 9px;
+}
+
+/* Dark is the palette the card originally shipped with. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg-from: #1b1b1b;
+  --bg-to: #0a0a0a;
+
+  --surface: rgba(255, 255, 255, 0.045);
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --surface-3: rgba(255, 255, 255, 0.1);
+  --surface-inset: rgba(255, 255, 255, 0.035);
+
+  --border: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.3);
+  --text: #f4f4f4;
+  --text-muted: #b3b3b3;
+  --text-faint: #8a8a8a;
+
+  --accent: #ffffff;
+  --on-accent: #0a0a0a;
+  --focus-ring: #ffffff;
+  --hover-wash: rgba(255, 255, 255, 0.08);
+
+  --veil: rgba(0, 0, 0, 0.62);
+
+  --glow-strong: rgba(255, 255, 255, 0.45);
+  --glow-soft: rgba(255, 255, 255, 0.14);
+
+  --wave-soft: #9c9c9c;
+  --wave-strong: #ffffff;
+
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.65);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.24);
+}
+
+/* ---------------------------------- base --------------------------------- */
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(160deg, var(--bg-from) 0%, var(--bg-to) 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  /* No align-items here on purpose: the card centres itself with margin:auto so
+     that on a short viewport (landscape phone, split screen) the overflow stays
+     scrollable. Flex centring would push the top out of reach. */
+  padding: 1rem;
+  transition: background var(--transition), color var(--transition);
+}
+
+.card {
+  position: relative;
+  /* Keeps the card above the services page's fixed decorative artwork. */
+  z-index: 2;
+  background: var(--surface);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 90%;
+  max-width: 800px;
+  /* Never taller than the viewport it is being shown in, so short screens do
+     not get a card that cannot be scrolled to the top of. */
+  min-height: 600px;
+  min-height: min(600px, 100vh);
+  min-height: min(600px, 100dvh);
+  height: auto;
+  margin: auto;
+  /* Wider than the old 2rem on the inline axis: the HUD bezel is drawn just
+     inside the card edge, so the text has to start clear of the side rails or
+     long lines run underneath them. */
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+/* ------------------------------ HUD bezel -------------------------------- */
+/*
+ * A sci-fi frame drawn around the card with pseudo-element-free spans, so the
+ * whole bezel is four children of one container rather than a stack of
+ * ::before/::after pairs fighting over the same box.
+ *
+ * Everything is sized from the tokens above, and the rails use percentages of
+ * the card so the frame stays put at any card height. The corner brackets are
+ * built from two borders each (a horizontal arm and a vertical arm) with a
+ * clipped notch, which is what gives the chamfered look in the reference.
+ *
+ * The container is `position: absolute` with `inset: 0`, so it tracks the card
+ * exactly, and it ignores pointer events - it is decoration, not UI.
+ */
+.hud {
+  position: absolute;
+  inset: 0;
+  /* Above the card contents but never interactive. The card's own stacking
+     context keeps this from escaping onto the page. */
+  z-index: 3;
+  pointer-events: none;
+  color: var(--ink);
+}
+
+/* ------------------------------ corners ---------------------------------- */
+/*
+ * Each bracket is one span with a border on two adjacent sides, rotated into
+ * the corner it belongs to. The top-left bracket is the base shape; the others
+ * are mirrored, so the geometry only has to be correct once.
+ */
+.hud-corner {
+  position: absolute;
+  width: var(--hud-corner);
+  height: var(--hud-corner);
+  border-style: solid;
+  border-color: currentColor;
+  border-width: 0;
+}
+
+/* Top-left: arms run right along the top and down the left. */
+.hud-corner--tl {
+  top: var(--hud-inset);
+  left: var(--hud-inset);
+  border-top-width: var(--hud-arm);
+  border-left-width: var(--hud-arm);
+  /* Cut the outer tip at 45 degrees, as in the reference artwork. */
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% var(--hud-arm),
+    var(--hud-arm) var(--hud-arm),
+    var(--hud-arm) 100%,
+    0 100%
+  );
+}
+
+/* Top-right and bottom-left are the same shape mirrored. */
+.hud-corner--tr {
+  top: var(--hud-inset);
+  right: var(--hud-inset);
+  border-top-width: var(--hud-arm);
+  border-right-width: var(--hud-arm);
+  clip-path: polygon(
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 var(--hud-arm),
+    calc(100% - var(--hud-arm)) var(--hud-arm),
+    calc(100% - var(--hud-arm)) 0
+  );
+}
+
+.hud-corner--bl {
+  bottom: var(--hud-inset);
+  left: var(--hud-inset);
+  border-bottom-width: var(--hud-arm);
+  border-left-width: var(--hud-arm);
+  clip-path: polygon(
+    0 100%,
+    100% 100%,
+    100% calc(100% - var(--hud-arm)),
+    var(--hud-arm) calc(100% - var(--hud-arm)),
+    var(--hud-arm) 0,
+    0 0
+  );
+}
+
+.hud-corner--br {
+  bottom: var(--hud-inset);
+  right: var(--hud-inset);
+  border-bottom-width: var(--hud-arm);
+  border-right-width: var(--hud-arm);
+  clip-path: polygon(
+    100% 100%,
+    0 100%,
+    0 calc(100% - var(--hud-arm)),
+    calc(100% - var(--hud-arm)) calc(100% - var(--hud-arm)),
+    calc(100% - var(--hud-arm)) 0,
+    100% 0
+  );
+}
+
+/* --------------------------- bars and hatching --------------------------- */
+/*
+ * The horizontal bars. `repeating-linear-gradient` draws the fine tick hatching
+ * from `currentColor` and transparent gaps, so the pattern scales with the bar
+ * and needs no image. The gradient is greyscale by construction - it only ever
+ * mixes the theme's own ink with transparency.
+ */
+.hud-bar {
+  position: absolute;
+  left: 50%;
+  height: var(--hud-bar-h);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* A solid cap at each end, hatching through the middle. */
+  background:
+    linear-gradient(currentColor, currentColor) left center / 22px 100%
+      no-repeat,
+    linear-gradient(currentColor, currentColor) right center / 22px 100%
+      no-repeat,
+    repeating-linear-gradient(
+      90deg,
+      currentColor 0 2px,
+      transparent 2px 5px
+    )
+      center / calc(100% - 44px) 5px no-repeat;
+}
+
+.hud-bar--top {
+  top: var(--hud-inset);
+  /* Short, because this is the vertical reading: the length belongs to the
+     side rails, not the top edge. */
+  width: min(46%, 260px);
+}
+
+.hud-bar--bottom {
+  bottom: var(--hud-inset);
+  width: min(52%, 300px);
+  /* The bottom bar reads as a plate: outline plus hatching, no solid caps. */
+  background:
+    linear-gradient(currentColor, currentColor) left center / 14px 100%
+      no-repeat,
+    linear-gradient(currentColor, currentColor) right center / 14px 100%
+      no-repeat,
+    repeating-linear-gradient(
+      90deg,
+      currentColor 0 2px,
+      transparent 2px 5px
+    )
+      center / calc(100% - 28px) 4px no-repeat;
+}
+
+/* The small diamond on the bottom bar, cut out of the hatching. */
+.hud-bar__diamond {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--surface);
+  border: 1.5px solid currentColor;
+}
+
+/* ------------------------------- side rails ------------------------------- */
+/*
+ * The vertical rails carry most of the bezel's length in this portrait layout.
+ * They are anchored with a percentage of the card height so they stay centred
+ * on cards of any height, including the taller services page.
+ */
+.hud-rail {
+  position: absolute;
+  width: var(--hud-rail-w);
+  /* Shortened at both ends so the rails run between the corner brackets rather
+     than colliding with them. */
+  top: calc(var(--hud-corner) + var(--hud-inset) + 6px);
+  bottom: calc(var(--hud-corner) + var(--hud-inset) + 6px);
+  background: repeating-linear-gradient(
+    180deg,
+    currentColor 0 14px,
+    transparent 14px 24px
+  );
+  background-size: 3px 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.hud-rail--left {
+  left: var(--hud-inset);
+}
+
+.hud-rail--right {
+  right: var(--hud-inset);
+}
+
+/* ------------------------- hatched accent tabs --------------------------- */
+/*
+ * The small diagonal-hatched blocks flanking the top bar and sitting at the
+ * bottom corners. A 45-degree repeating gradient gives the slash pattern; the
+ * clip-path trims each one into the angled tab shape from the reference.
+ */
+.hud-tick,
+.hud-tab {
+  position: absolute;
+  height: var(--hud-arm);
+  background: repeating-linear-gradient(
+    45deg,
+    currentColor 0 2px,
+    transparent 2px 6px
+  );
+}
+
+.hud-tick {
+  top: var(--hud-inset);
+  width: 34px;
+}
+
+.hud-tick--tl {
+  left: calc(var(--hud-inset) + var(--hud-corner) + 10px);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.hud-tick--tr {
+  right: calc(var(--hud-inset) + var(--hud-corner) + 10px);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%);
+}
+
+.hud-tab {
+  bottom: var(--hud-inset);
+  width: 40px;
+  height: calc(var(--hud-arm) + 3px);
+}
+
+/* The bottom tabs sit just outboard of the corner brackets. */
+.hud-tab--bl {
+  left: calc(var(--hud-inset) + var(--hud-corner) + 6px);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+.hud-tab--br {
+  right: calc(var(--hud-inset) + var(--hud-corner) + 6px);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%);
+}
+
+/* ------------------------- small-screen tuning --------------------------- */
+/*
+ * The brackets shrink and the inline padding tightens on phones, where a 58px
+ * bracket would eat a meaningful share of a 360px-wide card.
+ */
+@media screen and (max-width: 480px) {
+  :root {
+    --hud-corner: 40px;
+    --hud-arm: 4px;
+    --hud-bar-h: 10px;
+    --hud-rail-w: 8px;
+    --hud-inset: 7px;
+  }
+
+  .card {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .hud-bar--top {
+    width: min(40%, 180px);
+  }
+
+  .hud-bar--bottom {
+    width: min(46%, 200px);
+  }
+
+  .hud-tick,
+  .hud-tab {
+    display: none;
+  }
+}
+
+/* The frame is decoration, so it is not drawn when the reader has asked for
+   less visual noise alongside reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .hud {
+    opacity: 0.5;
+  }
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.card-header h1 {
+  /* The "Raahz Commissions" wordmark, and the Services & Prices title, share
+     this slot - both use the display face so the two pages match. */
+  font-family: var(--font-display);
+  /* Bruno Ace SC has no bold cut, so the h1 default would fake one. */
+  font-weight: 400;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  color: var(--text);
+  letter-spacing: 2px;
+}
+
+/* ------------------------------ toggle pair ------------------------------- */
+/*
+ * The sound and theme switches share one fixed cluster in the corner. The
+ * theme switch was `position: fixed` on its own; moving it inside a wrapper
+ * would have taken it out of the viewport's coordinate space and broken the
+ * corner placement, so the positioning moved up to the wrapper and the buttons
+ * are now laid out in normal flow inside it.
+ */
+.app-toggles {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sound-toggle {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+    border-color var(--transition);
+}
+
+.sound-toggle:hover {
+  background: var(--hover-wash);
+}
+
+.sound-toggle__icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ----------------------------- theme switch ------------------------------ */
+.theme-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.theme-toggle__track {
+  display: block;
+  position: relative;
+  width: 58px;
+  height: 30px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.theme-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  transition: transform var(--transition), background var(--transition),
+    color var(--transition);
+}
+
+:root[data-theme='dark'] .theme-toggle__thumb {
+  transform: translateX(28px);
+}
+
+.theme-toggle__icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* The nav-link class is shared by the home menu and the services category
+   picker, so button and anchor render identically. The per-page rules below
+   reset the user-agent chrome on <button> (border, centred text, its own font
+   shorthand); there is no shared reset here, because a rule with a higher
+   specificity than the page rules would start overriding their colours. */
+.nav-link {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------ responsive ------------------------------ */
+/* The shell's own breakpoints live here rather than in each page's stylesheet,
+   so the two pages cannot disagree about the card's padding. */
+@media screen and (max-width: 768px) {
+  .card {
+    width: 95%;
+    padding: 1rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .card {
+    padding: 0.8rem;
+  }
+
+  .card-body {
+    padding: 0.8rem;
+  }
+}
+

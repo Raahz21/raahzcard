@@ -1,0 +1,82 @@
+/*
+ * The Discord-style presence strip.
+ *
+ * The dot deliberately encodes status with weight and opacity rather than
+ * colour. The site is monochrome by design and scripts/audit-colors.mjs rejects
+ * any non-greyscale token, so Discord's green/amber/red are not available here
+ * without relaxing that check.
+ */
+.presence {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* Inset from the card edges so the HUD bezel's side rails do not crowd it. */
+  margin: 0 0.75rem 1.25rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface-2);
+}
+
+/* The status dot. Sized to read at a glance without shouting. */
+.presence__dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+/*
+ * Presence levels, expressed in ink rather than hue:
+ *   online  - filled, full strength
+ *   busy    - filled, dimmer, reads as "occupied"
+ *   idle    - hollow
+ *   offline - hollow and faintest
+ */
+.presence[data-presence='online'] .presence__dot {
+  background: var(--text);
+}
+
+.presence[data-presence='busy'] .presence__dot {
+  background: var(--text-muted);
+  border-color: var(--text-muted);
+}
+
+.presence[data-presence='idle'] .presence__dot {
+  background: transparent;
+}
+
+.presence[data-presence='offline'] .presence__dot {
+  background: transparent;
+  border-color: var(--text-faint);
+}
+
+.presence__icon {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  color: var(--text-muted);
+}
+
+.presence__label {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+  text-wrap: balance;
+}
+
+/* The long labels ("touching some grass") need the room on a phone. */
+@media screen and (max-width: 480px) {
+  .presence {
+    margin: 0 0.25rem 1rem;
+    padding: 0.55rem 0.7rem;
+    gap: 0.5rem;
+  }
+
+  .presence__label {
+    font-size: 0.88rem;
+  }
+}

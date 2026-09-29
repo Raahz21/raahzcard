@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Raahz Commissions - Genshin Impact piloting services. Prices and services for abyss, ascension, exploration, farming and more."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="theme-color" content="#1b1b1b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <title>Raahz Card</title>
+    <script>
+      // Resolve the theme before first paint so the card never flashes the
+      // wrong palette. Mirrors the logic in src/hooks/useTheme.js.
+      (function () {
+        try {
+          var stored = window.localStorage.getItem('raahzcard-theme')
+          document.documentElement.dataset.theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: light)').matches
+                ? 'light'
+                : 'dark'
+        } catch (error) {
+          /* localStorage unavailable - the markup default above applies */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      This card needs JavaScript. You can still read the price list at
+      <a href="https://github.com/Raahz21/raahzcard">the repository</a>.
+    </noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

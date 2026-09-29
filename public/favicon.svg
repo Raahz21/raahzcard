@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Raahz Card">
+  <rect width="64" height="64" rx="14" fill="#111111" />
+  <path
+    d="M32 8.5l7.3 15.4 16.2 2.4-11.8 11.6 2.9 16.6L32 46.6 17.4 54.5l2.9-16.6L8.5 26.3l16.2-2.4z"
+    fill="#ffffff"
+  />
+</svg>

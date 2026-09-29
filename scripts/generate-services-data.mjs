@@ -1,18 +1,37 @@
 /**
  * Generates src/data/services.js from the original services.html
- * (github.com/Raahz21/raahzcard).
+ * (github.com/Raahz21/raahzcard, branch `legacy-html`).
  *
- *   git clone --depth 1 https://github.com/Raahz21/raahzcard.git ..\raahzcard-original
+ * This is a ONE-TIME MIGRATION TOOL, not a build step. It reads a file that
+ * does not live in this repo, so it is deliberately not part of the deploy
+ * workflow. `src/data/services.js` is committed; regenerate it by hand only
+ * when the legacy source changes:
+ *
+ *   git clone --depth 1 -b legacy-html https://github.com/Raahz21/raahzcard.git ..\raahzcard-original
  *   node scripts/generate-services-data.mjs
  *
  * The price tables are large and would be tedious (and error prone) to re-type,
  * so they are generated instead. The self-checks below make the script fail
  * loudly if the parse ever drops content.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
-const SRC = process.argv[2] || 'D:/Raahz21/raahzcard-original/services.html';
+const SRC = process.argv[2] || process.env.LEGACY_SERVICES_HTML || 'D:/Raahz21/raahzcard-original/services.html';
 const OUT = new URL('../src/data/services.js', import.meta.url);
+
+if (!existsSync(SRC)) {
+  console.error(`Cannot find the legacy source file:\n  ${SRC}`);
+  console.error(
+    '\nThis generator needs services.html from the old plain-HTML site, which is not\n' +
+      'part of this repository. Clone the legacy branch and pass the path:\n\n' +
+      '  git clone --depth 1 -b legacy-html https://github.com/Raahz21/raahzcard.git ..\\raahzcard-original\n' +
+      '  node scripts/generate-services-data.mjs ..\\raahzcard-original\\services.html\n\n' +
+      'src/data/services.js is already committed, so this is only needed if the\n' +
+      'legacy price tables change. It is not required to build or deploy.'
+  );
+  process.exit(1);
+}
+
 const html = readFileSync(SRC, 'utf8');
 
 const decode = (s) =>

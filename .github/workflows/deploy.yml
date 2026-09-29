@@ -30,13 +30,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Sticker transparency and the service price list are build-time
-      # generators, so they have to run before the bundle is built.
+      # Sticker transparency is a real build step: the source JPEG is committed
+      # and the transparent PNG is derived from it. The price generator is NOT
+      # run here - it reads services.html from the old plain-HTML site, which is
+      # not in this repo. src/data/services.js is committed instead.
       - name: Generate sticker transparency
         run: npm run generate:stickers
-
-      - name: Generate service prices
-        run: npm run generate:prices
 
       # Catches a colour literal sneaking back into the stylesheets.
       - name: Audit colour tokens

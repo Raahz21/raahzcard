@@ -155,25 +155,23 @@ export const natlanExtraQuests = [
   },
 ];
 
-/* Bundle prices recomputed from the source sheet rather than carried over.
+/* Bundle price for the Natlan exploration slide ("All Natlan Areas with
+   Quest").
 
-   The generated figures were 3375 P for the Natlan bundle, which no longer
-   follows from the current sheet. Recomputed:
+   This is a stated figure, not a sum of the rows above it, so it is written as a
+   literal on purpose. An earlier version computed it as
+   exploration + world quests; that produced 3390 P, which was not the intended
+   price and has been corrected to 3850 P = $77.00.
 
-     exploration  10 areas, sheet subtotal 2235 P
-     world quests 11 quests, sheet subtotal 1155 P
-     bundle       2235 + 1155 = 3390 P = $67.80
-
-   Both subtotals were checked against the sum of their own entries in the
-   sheet, and the two agree exactly.
-
-   `bundleP` is written as the sum of the two subtotals rather than as a literal,
-   so the three cannot drift apart: an edited subtotal is picked up by the total
-   instead of leaving a figure that silently disagrees with the comment above. */
+   `explorationP` and `questsP` are kept only as the sheet's own subtotals for
+   reference. They deliberately do not add up to `bundleP` - the bundle is priced
+   as a package, so do not "fix" it by summing the two again. */
 export const natlanBundle = {
+  /* Sheet subtotals, for reference only. */
   explorationP: 2235,
   questsP: 1155,
-  bundleP: 2235 + 1155,
+  /* The real bundle price. */
+  bundleP: 3850,
 };
 
 export default {

@@ -47,7 +47,7 @@ export default function ServicesPage() {
 
           <div className="price-content">
             <div className="scroll-reminder">
-              Scroll horizontally <i>⟷</i> to view all prices
+              Swipe or scroll sideways <i>↔</i> for more columns
             </div>
 
             <ServiceCarousel

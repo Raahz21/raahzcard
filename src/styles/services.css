@@ -14,19 +14,28 @@
   gap: 2rem;
 }
 
+/* The category picker.
+   Rebuilt as a compact chip row. It was a grid of large buttons, each taking a
+   full grid cell with 1rem of padding, so eight categories became a wall of
+   oversized labels that pushed the actual price table off the screen. These are
+   now small inline pills that wrap onto as many lines as they need, keeping the
+   table as the focus of the page.
+
+   The labels are long ("Abyss Floor 12", "Domain Unlocks"), so they wrap rather
+   than truncate - a chip that hides half its own name is worse than a tall one. */
 .category-nav {
   width: 100%;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 0.8rem;
-  padding: 0.8rem;
+  padding: 0.6rem;
   transition: background var(--transition);
 }
 
 .category-nav__list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -35,53 +44,65 @@
 
 .category-nav__item {
   list-style-type: none;
-  width: 100%;
+  /* The old rule slid the whole item 10px to the right on hover, which dragged
+     the chip out of line with its neighbours. The chip itself handles its own
+     hover now. */
   transition: transform 0.3s ease;
 }
 
 .category-nav__item:hover {
-  transform: translateX(10px);
+  transform: none;
 }
 
-/* The category panel is light in both themes, so this text follows the theme
-   normally - unlike the home menu, which sits on a dark veil. The button resets
-   mirror the home menu's so all eight buttons are identical to each other. */
+/* A plain, high-contrast sans-serif label. Bruno Ace SC is a wide display cut
+   and at chip size its letterforms were hard to tell apart at a glance; the
+   body face is far quicker to scan. The display face is reserved for the
+   headings that identify a section, not for navigation. */
 .category-nav .category-nav__link {
   text-decoration: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
   margin: 0;
-  padding: 1rem;
-  border: 1px solid transparent;
-  color: var(--text);
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  color: var(--menu-text);
   text-align: center;
-  font: inherit;
-  font-size: 0.95rem;
-  line-height: inherit;
+  /* Explicitly not `font: inherit`, which would drag the display face back in
+     via a parent rule. */
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.3;
   background: var(--surface-3);
-  border-radius: 0.5rem;
+  border-radius: 999px;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-  transition: all 0.3s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
+/* The active chip is inverted to solid white-on-black rather than tinted, so
+   "which category am I looking at" is answered at a glance instead of by a
+   subtle background shift. */
 .category-nav__link:hover,
-.category-nav .category-nav__link:hover,
-.category-nav .category-nav__link.active {
+.category-nav .category-nav__link:hover {
   background: var(--hover-wash);
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
+  border-color: var(--menu-border-strong);
+}
+
+.category-nav .category-nav__link.active {
+  background: var(--menu-panel);
+  border-color: var(--menu-ring);
+  color: var(--menu-text);
 }
 
 /* ---------------------------- price content ----------------------------- */
-/* Bruno Ace SC is applied to the whole price area, per the brief. It ships a
-   single weight, so every font-weight below is pinned to 400 - leaving the old
-   500/700 values in place made the browser synthesise a faux bold, which the
-   face was never drawn for. Hierarchy comes from size, case and the opaque
-   header band instead. */
+/* The scroller itself. Its font-family is the body face, not the display one:
+   everything inside it (the table, sub-headings, notes, the scroll hint) now
+   sets the face it wants explicitly, so this is only the fallback for any text
+   added later without an explicit rule. The display face is confined to the h3
+   slide title, which is the one place it is branding rather than carrying data. */
 .price-content {
   width: 100%;
   overflow-x: auto;
@@ -93,7 +114,7 @@
   border: 1px solid var(--border);
   border-radius: 0.8rem;
   padding: 1rem;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 400;
   transition: background var(--transition);
 }
@@ -125,6 +146,9 @@
   padding: 0;
 }
 
+/* The h3 is the one place Bruno Ace SC is kept on this page: it is the section
+   title, so the display face is doing the job of branding rather than carrying
+   data. Everything below it is the body face. */
 .carousel h3 {
   font-family: var(--font-display);
   font-weight: 400;
@@ -133,15 +157,19 @@
   margin-bottom: 1rem;
   padding-bottom: 0.8rem;
   border-bottom: 1px solid var(--border);
+  color: var(--menu-text);
 }
 
+/* Sub-headings describe a group of rows, so they are labels rather than titles:
+   body face, full contrast, and no forced one-line rule. `white-space: nowrap`
+   was truncating anything long. */
 .carousel h4 {
-  font-family: var(--font-display);
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-weight: 600;
   font-size: 0.92rem;
-  color: var(--text-muted);
-  margin: 1.5rem 0 0.8rem;
-  padding-bottom: 0.5rem;
+  color: var(--text);
+  margin: 1.5rem 0 0.6rem;
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -150,56 +178,75 @@
 }
 
 .note {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 400;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   line-height: 1.6;
-  color: var(--text-muted);
+  color: var(--text);
   margin-bottom: 1rem;
-  padding: 0.75rem 0.9rem;
+  padding: 0.7rem 0.85rem;
   background: var(--surface-3);
   border-radius: 0.5rem;
   border-left: 3px solid var(--border-strong);
 }
 
 /* ------------------------------ tables ---------------------------------- */
+/* Back to the sans-serif body face for the table. Bruno Ace SC is a wide
+   display cut with a single weight; across dozens of short cells it looked
+   cramped and inconsistent, and mixed-case text like "Puzzle Unlock" set in it
+   was slower to read than a normal UI face. The display face is kept for the
+   h3 slide title above, which is the one place it does the job of branding a
+   section rather than carrying data.
+
+   Text is --text, not --text-muted: these are the values people came to read, so
+   they get full-contrast white in dark mode rather than the dimmed grey used for
+   secondary notes. */
 .price-table {
-  /* No min-width. A fixed floor made the table wider than the panel even when
+  /* No min-width. A fixed floor made every table wider than the panel even when
      the columns fitted comfortably, so the panel scrolled sideways while
-     looking at nothing - it appeared to "force a swipe" on a table with only
-     three or four columns. The table now takes the width it actually needs and
-     the panel scrolls only when the content genuinely overflows. */
+     looking at nothing. The table now takes the width it actually needs and the
+     panel scrolls only when the content genuinely overflows. */
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   margin: 0;
-  font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
   font-weight: 400;
 }
 
 .price-table th {
   background: var(--surface-3);
-  font-weight: 400;
-  padding: 0.75rem 0.85rem;
+  font-weight: 600;
+  padding: 0.75rem 0.9rem;
   text-transform: uppercase;
-  font-size: 0.72rem;
-  letter-spacing: 0.5px;
+  font-size: 0.7rem;
+  letter-spacing: 0.6px;
   text-align: left;
   vertical-align: bottom;
+  color: var(--text);
   border-bottom: 2px solid var(--border-strong);
 }
 
 .price-table td,
 .price-table tbody th {
-  padding: 0.7rem 0.85rem;
+  padding: 0.7rem 0.9rem;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 400;
   text-align: left;
   vertical-align: middle;
-  color: var(--text-muted);
+  color: var(--text);
+}
+
+/* Zebra striping. With thin single-pixel rules and no fill, a wide table is hard
+   to track across to the right-hand columns - the eye follows the row border
+   until it fades. An alternating tint gives the eye something continuous to
+   follow, which is most of what makes a scrolling table readable. */
+.price-table tbody tr:nth-child(even) td,
+.price-table tbody tr:nth-child(even) th {
+  background: var(--surface-stripe);
 }
 
 /* The first column is frozen so the item being priced stays on screen while the
@@ -221,6 +268,14 @@
   background: var(--surface-raise);
 }
 
+/* The stripe has to be re-stated for the frozen cell. The even-row rule above
+   also matches the first cell of a striped row, and it comes later in the file
+   for `td` but not for the `th` in `tbody`, so without this the frozen column
+   would lose its own banding halfway down. */
+.price-table tbody tr:nth-child(even) th:first-child {
+  background: var(--surface-stripe);
+}
+
 /* Price columns read as figures, so they are right-aligned against each other,
    which makes the numbers easy to compare down the column. */
 .price-table td:not(:first-child) {
@@ -228,21 +283,19 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The class was present in the original markup but had no rule attached.
-   Kept a background rather than a heavier weight, since the display face has
-   only one weight and a faux bold would smear it. */
+/* The class was present in the original markup but had no rule attached. */
 .price-table .total-row th,
 .price-table .total-row td {
-  font-weight: 400;
+  font-weight: 600;
   color: var(--text);
-  background: var(--hover-wash);
+  background: var(--surface-3);
   border-top: 2px solid var(--border-strong);
 }
 
 /* The total row's frozen cell must stay opaque too, otherwise the rows above
    scroll through it. */
 .price-table .total-row th:first-child {
-  background: var(--surface-raise);
+  background: var(--surface-3);
 }
 
 /* ------------------------------ carousel -------------------------------- */
@@ -262,46 +315,60 @@
   margin-top: 2rem;
 }
 
+/* Compact prev/next. These were 0.8rem x 1.5rem blocks around a single arrow
+   glyph, which read as two large empty slabs rather than as arrow buttons. The
+   arrow is the label, so the button is sized to the arrow. */
 .nav-button {
   background: var(--surface-3);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 0.8rem 1.5rem;
-  border-radius: 0.5rem;
+  border: 1px solid var(--border-strong);
+  color: var(--menu-text);
+  /* Square-ish: just enough padding around the arrow to make a comfortable
+     44px touch target without the wasted width. */
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .nav-button:hover {
   background: var(--hover-wash);
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--menu-ring);
 }
 
 .nav-button:active {
-  transform: translateY(0);
+  transform: none;
 }
 
 .carousel-status {
-  margin: 0.7rem 0 0;
+  margin: 0.6rem 0 0;
   text-align: center;
-  font-size: 0.78rem;
-  color: var(--text-faint);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 /* --------------------------- scroll reminder ---------------------------- */
-/* The table is now expected to scroll sideways at every width, so this hint is
-   no longer a small-screen-only extra: it is always shown. It is also sticky to
-   the left edge, because without that it scrolls out of sight after the first
-   swipe and stops doing its job. */
+/* The table scrolls sideways at every width, so this hint is always shown. It is
+   sticky to the left edge, because otherwise it scrolls out of sight after the
+   first swipe and stops doing its job.
+
+   It is also now short, muted, and in the body face. It was a long uppercase
+   line in the display face at the very top of the panel, which read as a
+   heading and competed with the actual section title for attention. */
 .scroll-reminder {
-  font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
   color: var(--text-muted);
   text-align: left;
-  padding: 0.6rem 0;
+  padding: 0 0 0.5rem;
   margin-bottom: 0.5rem;
   border-bottom: 1px solid var(--border);
   display: block;
@@ -392,17 +459,18 @@
   }
 
   .category-nav {
-    padding: 0.6rem;
+    padding: 0.5rem;
   }
 
+  /* The chips are a wrapping flex row now, so this no longer sets a grid
+     template. It only tightens the gap between them. */
   .category-nav__list {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.6rem;
+    gap: 0.3rem;
   }
 
   .category-nav .category-nav__link {
-    padding: 0.8rem;
-    font-size: 0.9rem;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
   }
 
   .price-content {
@@ -412,9 +480,8 @@
   }
 
   /* Tighten the padding on narrow screens. The type size is deliberately left
-     alone: it is already set small enough to read, and Bruno Ace SC is a wide
-     face, so scaling it down further only trades legibility for fit. The table
-     scrolls instead. */
+     alone: it is already set small enough to read, so scaling it down further
+     only trades legibility for fit. The table scrolls instead. */
   .price-table th,
   .price-table td,
   .price-table tbody th {
@@ -457,10 +524,18 @@
   }
 
   .carousel-nav {
-    gap: 0.8rem;
+    gap: 0.6rem;
   }
 
-  .nav-button,
+  /* The arrow buttons are sized by width/height now, so only the .btn keeps a
+     padding override here - setting padding on .nav-button as well would have
+     no effect on the box and just added noise. */
+  .nav-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+  }
+
   .btn {
     padding: 0.6rem 1rem;
     font-size: 0.9rem;

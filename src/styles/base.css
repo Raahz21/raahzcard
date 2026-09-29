@@ -82,6 +82,10 @@ html {
      background would let them show through. It has to be opaque, which means it
      cannot be a --surface-* token (those are washes over the page gradient). */
   --surface-raise: #f0f0f0;
+  /* The zebra stripe for alternate table rows. This one is opaque for the same
+     reason as --surface-raise: it is applied to the frozen first column, and a
+     translucent fill would let the rows sliding underneath show through. */
+  --surface-stripe: #e7e7e7;
   /* The edge of the frozen column, to separate it from the scrolling cells. */
   --freeze-edge: rgba(0, 0, 0, 0.18);
 
@@ -140,6 +144,7 @@ html {
   --scrollbar-thumb: rgba(255, 255, 255, 0.24);
 
   --surface-raise: #232323;
+  --surface-stripe: #292929;
   --freeze-edge: rgba(255, 255, 255, 0.22);
 }
 

@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "audit:colors": "node scripts/audit-colors.mjs",
     "generate:prices": "node scripts/generate-services-data.mjs",
-    "generate:stickers": "node scripts/extract-sticker-alpha.mjs"
+    "generate:stickers": "node scripts/extract-sticker-alpha.mjs",
+    "generate:artwork": "node scripts/prepare-artwork.mjs"
   },
   "dependencies": {
     "react": "^19.3.0",

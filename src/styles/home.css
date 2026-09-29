@@ -154,7 +154,9 @@
   background-position: center;
   background-repeat: no-repeat;
   opacity: 0;
-  filter: grayscale(1) contrast(1.05);
+  /* Greyscale is baked into the PNGs by scripts/prepare-artwork.mjs. The filter
+     used to live here; on a full-bleed layer it re-rasterised a viewport-sized
+     image on every crossfade, so it is gone. */
   transition: opacity 800ms ease;
 }
 
@@ -186,8 +188,9 @@
   transition: transform 0.3s ease;
   will-change: transform;
   animation: portrait-glow 2.5s ease-in-out infinite;
-  /* Desaturated so the artwork matches the greyscale palette. */
-  filter: grayscale(1) contrast(1.05);
+  /* Greyscale is baked into the PNG by scripts/prepare-artwork.mjs, so no
+     filter is needed here. That matters because this element animates: a
+     filter plus an animation is re-evaluated on the main thread every frame. */
   /* Driven by useFloatAnimation through these custom properties. The float is
      translate + rotate only, so it can never shift the image off centre. */
   transform: translateY(var(--float-y, 0px)) rotate(var(--float-rot, 0deg));

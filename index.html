@@ -8,12 +8,48 @@
       content="Raahz Commissions - Genshin Impact piloting services. Prices and services for abyss, ascension, exploration, farming and more."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!--
+      Bruno Ace SC is self-hosted rather than pulled from fonts.googleapis.com.
+
+      Two reasons, both about how the page felt:
+
+      1. Speed. The Google Fonts route is two extra round-trips (the CSS, then
+         the woff2) before any text can use the real face. Self-hosted, the
+         preload below starts the 15 KB download during HTML parse, in parallel
+         with the JS bundle, instead of after it.
+      2. No reflow. `swap` paints the text immediately in a fallback face and
+         then reflows the whole page when the display face arrives. Since this
+         face is the card's identity, `block` is used instead: text is hidden
+         for at most the ~100ms the local file takes, and then appears once, in
+         the correct face, with no second layout. That swap-and-shuffle was a
+         large part of the "laggy" feeling on first load.
+
+      `font-display: block` is paired with a preload, so the font is normally
+      already in the cache by the time the first text paints.
+    -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="./fonts/bruno-ace-sc-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
+    <style>
+      @font-face {
+        font-family: 'Bruno Ace SC';
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+        src: url('./fonts/bruno-ace-sc-latin.woff2') format('woff2');
+        /* The latin subset only. The card has no accented characters, so
+           shipping the latin-ext file as well would be dead weight. */
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+          U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+          U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+    </style>
+
     <meta name="theme-color" content="#1b1b1b" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <title>Raahz Card</title>

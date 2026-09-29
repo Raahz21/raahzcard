@@ -37,6 +37,11 @@ jobs:
       - name: Generate sticker transparency
         run: npm run generate:stickers
 
+      # Bakes the greyscale into the character art so the browser does not have
+      # to run a filter on sixteen continuously animating images.
+      - name: Prepare character artwork
+        run: npm run generate:artwork
+
       # Catches a colour literal sneaking back into the stylesheets.
       - name: Audit colour tokens
         run: npm run audit:colors

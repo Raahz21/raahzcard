@@ -89,7 +89,6 @@
      flick scrolls the table instead of chaining to the page. */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 0.8rem;
@@ -129,7 +128,7 @@
 .carousel h3 {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   white-space: nowrap;
   margin-bottom: 1rem;
   padding-bottom: 0.8rem;
@@ -139,7 +138,7 @@
 .carousel h4 {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 1.05rem;
+  font-size: 0.92rem;
   color: var(--text-muted);
   margin: 1.5rem 0 0.8rem;
   padding-bottom: 0.5rem;
@@ -153,7 +152,7 @@
 .note {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   line-height: 1.6;
   color: var(--text-muted);
   margin-bottom: 1rem;
@@ -165,47 +164,42 @@
 
 /* ------------------------------ tables ---------------------------------- */
 .price-table {
-  /* Wider than the viewport on purpose: the columns are now large enough to
-     touch, so the table is expected to scroll sideways rather than compress.
-     640px keeps 5 columns readable before it needs to scroll on a phone. */
-  min-width: 640px;
+  /* No min-width. A fixed floor made the table wider than the panel even when
+     the columns fitted comfortably, so the panel scrolled sideways while
+     looking at nothing - it appeared to "force a swipe" on a table with only
+     three or four columns. The table now takes the width it actually needs and
+     the panel scrolls only when the content genuinely overflows. */
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 400;
 }
 
 .price-table th {
   background: var(--surface-3);
   font-weight: 400;
-  /* Taller rows and looser tracking: this face is a wide display cut, so it
-     needs the air to stay readable at a glance. */
-  padding: 1.15rem 1.1rem;
+  padding: 0.75rem 0.85rem;
   text-transform: uppercase;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
   text-align: left;
   vertical-align: bottom;
   border-bottom: 2px solid var(--border-strong);
-  /* Each header column is a snap target, so a flick lands on a whole column
-     instead of between two. */
-  scroll-snap-align: start;
 }
 
 .price-table td,
 .price-table tbody th {
-  padding: 1.15rem 1.1rem;
+  padding: 0.7rem 0.85rem;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 400;
   text-align: left;
   vertical-align: middle;
   color: var(--text-muted);
-  scroll-snap-align: start;
 }
 
 /* The first column is frozen so the item being priced stays on screen while the
@@ -338,8 +332,14 @@
   width: 64px;
   height: 64px;
   opacity: 0.14;
-  filter: grayscale(1) contrast(1.05);
   transition: opacity 0.3s ease;
+  /* No filter here on purpose. These sixteen images each run an infinite float
+     animation, and a filter combined with a transform animation is re-evaluated
+     every frame on the main thread, which is what made the page feel laggy and
+     busy while doing nothing. The greyscale is baked into the PNGs by
+     scripts/prepare-artwork.mjs instead, so the animation is now just a
+     compositor-friendly transform. */
+  will-change: transform;
 }
 
 .icon-small {
@@ -411,17 +411,18 @@
     width: calc(100% + 1rem);
   }
 
-  /* The type scale is NOT shrunk here. Bruno Ace SC is a wide face and the
-     point of the change was a larger, more legible table, so the old
-     0.85rem / 0.7rem step-down would undo it. Only the padding tightens. */
+  /* Tighten the padding on narrow screens. The type size is deliberately left
+     alone: it is already set small enough to read, and Bruno Ace SC is a wide
+     face, so scaling it down further only trades legibility for fit. The table
+     scrolls instead. */
   .price-table th,
   .price-table td,
   .price-table tbody th {
-    padding: 0.95rem 0.9rem;
+    padding: 0.6rem 0.7rem;
   }
 
   .price-table th {
-    font-size: 0.82rem;
+    font-size: 0.68rem;
   }
 
   .icon {
@@ -447,12 +448,12 @@
   .price-table th,
   .price-table td,
   .price-table tbody th {
-    padding: 0.85rem 0.75rem;
+    padding: 0.55rem 0.6rem;
   }
 
   .price-table th {
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
+    font-size: 0.64rem;
+    letter-spacing: 0.4px;
   }
 
   .carousel-nav {
